@@ -1,0 +1,15 @@
+{
+    "name": "betorcs/upload-file-manager",
+    "description": "Library to manager file upload",
+    "type": "library",
+    "scripts": {
+        "test": "phpunit tests"
+    },
+    "autoload": {
+        "classmap": ["lib/"]
+    },
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^6"
+    }
+}
