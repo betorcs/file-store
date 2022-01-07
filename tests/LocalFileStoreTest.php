@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use Betorcs\LocalFileStore;
 
 class LocalFileStoreTest extends TestCase
 {
@@ -37,7 +38,7 @@ class LocalFileStoreTest extends TestCase
     }
 
     /**
-     * @expectedException Betorcs\FileStoreException
+     * @expectedException Betorcs\Exception\KeyNotFoundException
      * @expectedExceptionMessage No file found for given key
      */
     public function testDeleteKey()
@@ -53,7 +54,7 @@ class LocalFileStoreTest extends TestCase
     }
 
     /**
-     * @expectedException Betorcs\FileStoreException
+     * @expectedException Betorcs\Exception\KeyNotFoundException
      * @expectedExceptionMessage No file found for given key
      */
     public function testCleanKey()
@@ -83,7 +84,7 @@ class LocalFileStoreTest extends TestCase
     }
 
     /**
-     * @expectedException Betorcs\FileStoreException
+     * @expectedException Betorcs\Exception\FileExpiredException
      * @expectedExceptionMessage File expired
      */
     public function testRecoverExpiredFileShouldThrowException()

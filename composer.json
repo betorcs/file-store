@@ -1,15 +1,22 @@
 {
-    "name": "betorcs/upload-file-manager",
-    "description": "Library to manager file upload",
+    "name": "betorcs/file-store",
+    "description": "Library to manage file by key",
     "type": "library",
     "scripts": {
         "test": "phpunit tests"
     },
     "autoload": {
-        "classmap": ["lib/"]
+        "psr-4": {
+            "Betorcs\\": "lib"
+        }
     },
-    "require": {},
-    "require-dev": {
-        "phpunit/phpunit": "^6"
-    }
+    "require": {
+        "php": "^7.1"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "betorcs"
+        }
+    ]
 }

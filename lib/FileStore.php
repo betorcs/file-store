@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Betorcs;
 
@@ -42,4 +44,11 @@ interface FileStore
      * @return boolean
      */
     public function exists(string $key): bool;
+
+    /**
+     * Deletes all keys contents.
+     *
+     * @return void
+     */
+    public function clean(): void;
 }

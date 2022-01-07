@@ -1,12 +1,14 @@
 <?php
 
-namespace Betorcs;
+declare(strict_types=1);
 
-class FileStoreException extends \Exception {
+namespace Betorcs\Exception;
+
+class FileStoreException extends \Exception
+{
 
     function __construct(string $message, \Throwable $cause = null)
     {
         parent::__construct($message, 0, $cause);
     }
-
 }
