@@ -2,20 +2,36 @@
 
 declare(strict_types=1);
 
-use Betorcs\FileStore;
-use Betorcs\FileStoreException;
+namespace Betorcs;
 
+use Betorcs\Exception\DeleteKeyException;
+use Betorcs\Exception\FileExpiredException;
+use Betorcs\Exception\KeyNotFoundException;
+use Betorcs\Exception\FileStoreException;
+use Betorcs\FileStore;
+
+/**
+ * Implements FileStore in local file system, using the base directory to store the files.
+ */
 class LocalFileStore implements FileStore
 {
 
-    private const PREFIX = 'st-';
-    private $dir;
+    private const PREFIX = 'fs$-';
+    private $baseDir;
 
-    function __construct(string $dir)
+    /**
+     * Default constructor.
+     *
+     * @param string $baseDir base directory when files should be saved.
+     */
+    function __construct(string $baseDir)
     {
-        $this->dir = $dir;
+        $this->baseDir = $baseDir;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function store(string $content, int $exp): string
     {
         $key = $this->createKey($exp);
@@ -32,39 +48,49 @@ class LocalFileStore implements FileStore
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function restore(string $key): string
     {
         try {
             $path = $this->getFilePath($key);
             if (!file_exists($path)) {
-                throw new \Exception("No file found for given key");
+                throw new KeyNotFoundException();
             }
             if ($this->isExpired($key)) {
-                throw new \Exception('File expired');
+                throw new FileExpiredException();
             }
-            $stream = fopen($path, 'r');
-            $content = fread($stream, filesize($path));
-            fclose($stream);
+            $handler = fopen($path, 'r');
+            $content = fread($handler, filesize($path));
+            fclose($handler);
             return $content;
+        } catch (FileExpiredException $e) {
+            throw $e;
+        } catch (KeyNotFoundException $e) {
+            throw $e;
         } catch (\Exception $e) {
             throw new FileStoreException($e->getMessage(), $e);
         }
     }
 
-    public function delete(string $key): void {
+    /**
+     * {@inheritdoc}
+     */
+    public function delete(string $key): void
+    {
         $path = $this->getFilePath($key);
         if (file_exists($path) && !unlink($path)) {
-            throw new FileStoreException("It was not possible to delete key");
+            throw new DeleteKeyException();
         }
     }
 
     /**
-     * Deletes all keys contents.
-     *
-     * @return void
+     * {@inheritdoc}
      */
-    public function clean(): void {
-        $d = dir($this->dir);
+    public function clean(): void
+    {
+        $d = dir($this->baseDir);
         while (false !== ($entry = $d->read())) {
             $key = basename($entry);
             if (strpos($key, self::PREFIX) === 0) {
@@ -74,8 +100,12 @@ class LocalFileStore implements FileStore
         $d->close();
     }
 
-    public function deleteAllExpired(): void {
-        $d = dir($this->dir);
+    /**
+     * {@inheritdoc}
+     */
+    public function deleteAllExpired(): void
+    {
+        $d = dir($this->baseDir);
         while (false !== ($entry = $d->read())) {
             $key = basename($entry);
             if (strpos($key, self::PREFIX) === 0 && $this->isExpired($key)) {
@@ -85,7 +115,13 @@ class LocalFileStore implements FileStore
         $d->close();
     }
 
-    public function exists(string $key): bool {
+    /**
+     * Deletes all keys contents.
+     *
+     * @return void
+     */
+    public function exists(string $key): bool
+    {
         $path = $this->getFilePath($key);
         return file_exists($path);
     }
@@ -94,8 +130,8 @@ class LocalFileStore implements FileStore
     {
         if (preg_match('/\d{8,}/', $key, $matches) && count($matches) === 1) {
             $ts = $matches[0];
-            $date = new DateTime("@$ts");
-            $now = new DateTime('now', new DateTimeZone('UTC'));
+            $date = new \DateTime("@$ts");
+            $now = new \DateTime('now', new \DateTimeZone('UTC'));
             return $date < $now;
         }
 
@@ -106,13 +142,13 @@ class LocalFileStore implements FileStore
     {
         $day = 60 * 60 * 24;
         $exp = $exp > 0 ? $exp : $day;
-        $date = new DateTime('now', new DateTimeZone('UTC'));
-        $date->add(new DateInterval("PT${exp}S"));
+        $date = new \DateTime('now', new \DateTimeZone('UTC'));
+        $date->add(new \DateInterval("PT${exp}S"));
         return uniqid(self::PREFIX . $date->getTimestamp() . '-');
     }
 
     private function getFilePath($key)
     {
-        return "$this->dir/$key";
+        return "$this->baseDir/$key";
     }
 }
