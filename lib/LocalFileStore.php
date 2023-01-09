@@ -16,17 +16,21 @@ use Betorcs\FileStore;
 class LocalFileStore implements FileStore
 {
 
-    private const PREFIX = 'fs$-';
+    private const DEFAULT_PREFIX = 'fs$-';
     private $baseDir;
+    private $prefix;
 
     /**
      * Default constructor.
      *
      * @param string $baseDir base directory when files should be saved.
+     * @param string $prefix the prefix to be used in the temporary name file, 
+     *                       if it's null the {@code DEFAULT_PREFIX} will be used.
      */
-    function __construct(string $baseDir)
+    function __construct(string $baseDir, string $prefix = null)
     {
         $this->baseDir = $baseDir;
+        $this->prefix = $prefix ?? self::DEFAULT_PREFIX
     }
 
     /**
@@ -93,7 +97,7 @@ class LocalFileStore implements FileStore
         $d = dir($this->baseDir);
         while (false !== ($entry = $d->read())) {
             $key = basename($entry);
-            if (strpos($key, self::PREFIX) === 0) {
+            if (strpos($key, $this->prefix) === 0) {
                 $this->delete($key);
             }
         }
@@ -108,7 +112,7 @@ class LocalFileStore implements FileStore
         $d = dir($this->baseDir);
         while (false !== ($entry = $d->read())) {
             $key = basename($entry);
-            if (strpos($key, self::PREFIX) === 0 && $this->isExpired($key)) {
+            if (strpos($key, $this->prefix) === 0 && $this->isExpired($key)) {
                 $this->delete($key);
             }
         }
@@ -144,7 +148,7 @@ class LocalFileStore implements FileStore
         $exp = $exp > 0 ? $exp : $day;
         $date = new \DateTime('now', new \DateTimeZone('UTC'));
         $date->add(new \DateInterval("PT${exp}S"));
-        return uniqid(self::PREFIX . $date->getTimestamp() . '-');
+        return uniqid($this->prefix . $date->getTimestamp() . '-');
     }
 
     private function getFilePath($key)
