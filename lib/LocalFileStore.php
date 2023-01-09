@@ -30,7 +30,7 @@ class LocalFileStore implements FileStore
     function __construct(string $baseDir, string $prefix = null)
     {
         $this->baseDir = $baseDir;
-        $this->prefix = $prefix ?? self::DEFAULT_PREFIX
+        $this->prefix = $prefix ?? self::DEFAULT_PREFIX;
     }
 
     /**

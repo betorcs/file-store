@@ -18,7 +18,7 @@ interface FileStore
     /**
      * Returns file content from given $key.
      * @param string $key File key.
-     * @return File content.
+     * @return string content.
      */
     public function restore(string $key): string;
 
